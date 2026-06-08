@@ -1,205 +1,282 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Score Bola Jaring</title>
 
-<meta charset="UTF-8">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: white;
+            background-image: url("background.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden; /* Elakkan scrollbar muncul */
+        }
 
-<title>Live Score Bola Jaring</title>
+        .overlay {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-<style>
+        .scoreboard {
+            width: 95%;
+            max-width: 1400px;
+            background: rgba(0, 0, 0, 0.65); /* Ditambah gelap sedikit supaya teks lebih jelas */
+            padding: 25px 20px 40px 20px;
+            border-radius: 30px;
+            box-sizing: border-box;
+            border: 2px solid rgba(255, 217, 0, 0.3); /* Border emas nipis */
+        }
 
-body{
+        /* Bekas Logo untuk memposisikan imej ke tengah */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
 
-margin:0;
+        /* Tetapan saiz logo yang seimbang untuk PC */
+        .logo-container img {
+            width: 8vw; /* Saiz mengecil/membesar ikut skrin PC */
+            max-width: 110px; /* Had saiz maksimum di PC besar */
+            min-width: 80px;  /* Had saiz minimum */
+            height: auto;
+            filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.5)); /* Bayang lembut belakang logo */
+        }
 
-height:100vh;
+        /* Gaya Tulisan Tajuk Kejohanan */
+        .tournament-title {
+            text-align: center;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: 3.2vw; /* Saiz automatik ikut skrin PC */
+            color: #FFD700; /* Warna Emas */
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+        }
 
-font-family:Arial,sans-serif;
+        /* Gaya Tulisan Bilangan Perlawanan */
+        .match-number {
+            text-align: center;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 1.8vw;
+            color: #ffffff;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
 
-color:white;
+        /* Gabungan Nama & Skor (Atas & Bawah) */
+        .team-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
 
-background-image:url("background.png");
+        /* Susunan Grid Utama untuk PC (3 Lajur) */
+        .teams {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 2fr; /* [Pasukan A] [Masa] [Pasukan B] */
+            align-items: center;
+            width: 100%;
+            gap: 20px;
+        }
 
-background-size:cover;
+        .team {
+            font-size: 3.5vw; /* Font automatik resize */
+            font-weight: bold;
+            text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
 
-background-position:center;
+        .score {
+            font-size: 9vw; /* Font automatik resize */
+            font-family: 'Impact', Arial, sans-serif;
+            font-weight: bold;
+            text-align: center;
+            color: #FFD700;
+            line-height: 1;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
 
-background-repeat:no-repeat;
+        .middle {
+            text-align: center;
+        }
 
-}
+        .status {
+            font-size: 1.6vw;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #a4b3d6;
+            letter-spacing: 1px;
+        }
 
-.overlay{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-}
+        .timer {
+            font-size: 5vw;
+            font-family: monospace; /* Font digital kemas untuk masa */
+            font-weight: bold;
+            margin-top: 10px;
+            color: #2ecc71; /* Warna hijau neon untuk timer */
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+        }
 
-.scoreboard{
+        /* ========================================================
+           RESPONSIVE DESIGN: Sesuai Untuk Telefon (Mobile Phone)
+           ======================================================== */
+        @media (max-width: 768px) {
+            .scoreboard {
+                padding: 20px 15px 25px 15px;
+                border-radius: 20px;
+            }
 
-width:90%;
+            /* Saiz logo yang dikecilkan bersesuaian dengan skrin telefon */
+            .logo-container {
+                margin-bottom: 10px;
+            }
+            
+            .logo-container img {
+                width: 85px;
+            }
 
-background:rgba(0,0,0,0.45);
+            /* Saiz tajuk khusus untuk telefon */
+            .tournament-title {
+                font-size: 22px;
+                margin-bottom: 5px;
+                line-height: 1.3;
+            }
 
-padding:40px;
+            /* Saiz bilangan perlawanan di telefon */
+            .match-number {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
 
-border-radius:30px;
+            /* Tukar susunan grid melintang PC kepada menegak ke bawah di telefon */
+            .teams {
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+            }
 
-}
+            /* Saiz font yang optimum untuk skrin kecil telefon */
+            .team {
+                font-size: 28px;
+                margin-bottom: 5px;
+            }
 
-.teams{
+            .score {
+                font-size: 70px;
+            }
 
-display:grid;
+            /* Bahagian masa/timer ditolak naik ke atas sekali pada skrin telefon */
+            .middle {
+                order: -1; 
+                margin-bottom: 5px;
+                border-bottom: 2px solid rgba(255,255,255,0.15);
+                padding-bottom: 15px;
+                width: 100%;
+            }
 
-grid-template-columns:
-1fr 250px 300px 250px 1fr;
+            .status {
+                font-size: 16px;
+            }
 
-align-items:center;
-
-width:100%;
-
-}
-
-.team{
-
-font-size:60px;
-font-weight:bold;
-
-text-align:center;
-
-word-wrap:break-word;
-
-padding:0 20px;
-
-}
-
-.team{
-
-font-size:90px;
-font-weight:bold;
-text-align:center;
-
-}
-
-.score{
-
-font-size:190px;
-font-weight:bold;
-text-align:center;
-color:#FFD700;
-
-}
-
-.middle{
-
-text-align:center;
-
-}
-
-.status{
-
-font-size:45px;
-
-font-weight:bold;
-
-}
-
-.timer{
-
-font-size:90px;
-
-font-weight:bold;
-
-margin-top:10px;
-
-}
-
-</style>
-
+            .timer {
+                font-size: 50px;
+                margin-top: 5px;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="overlay">
+    <div class="scoreboard">
+        
+        <div class="logo-container">
+            <img src="logo_pdrm.png" alt="Logo PDRM">
+        </div>
+        
+        <div class="tournament-title">
+            Perlawanan Bola Jaring<br>Piala KP Selangor 2026
+        </div>
 
-<div class="scoreboard">
+        <div class="match-number" id="matchNumber">PERLAWANAN 1</div>
 
-<div class="teams">
+        <div class="teams">
+            
+            <div class="team-box">
+                <div class="team" id="teamA">PASUKAN A</div>
+                <div class="score" id="scoreA">0</div>
+            </div>
 
-<div class="team" id="teamA">
-PASUKAN A
-</div>
+            <div class="middle">
+                <div class="status" id="status">SEPARUH MASA PERTAMA</div>
+                <div class="timer" id="timer">10:00</div>
+            </div>
 
-<div class="score" id="scoreA">
-0
-</div>
+            <div class="team-box">
+                <div class="team" id="teamB">PASUKAN B</div>
+                <div class="score" id="scoreB">0</div>
+            </div>
 
-<div class="middle">
-
-<div class="status" id="status">
-SEPARUH MASA PERTAMA
-</div>
-
-<div class="timer" id="timer">
-10:00
-</div>
-
-</div>
-
-<div class="score" id="scoreB">
-0
-</div>
-
-<div class="team" id="teamB">
-PASUKAN B
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
+        </div>
+    </div>
 </div>
 
 <script>
+    // Konfigurasi Firebase kpcupbolajaring2026
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_r3S48RffSWJ5Zfx6DuNbLsQe1NiqxNk",
+        authDomain: "kpcupbolajaring2026.firebaseapp.com",
+        projectId: "kpcupbolajaring2026",
+        storageBucket: "kpcupbolajaring2026.firebasestorage.app",
+        messagingSenderId: "1003385616201",
+        appId: "1:1003385616201:web:6d475aa234b96380a78c98",
+        measurementId: "G-RQ793SKH7C",
+        databaseURL: "https://kpcupbolajaring2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
 
-function loadData(){
+    // Hubungkan fail ke Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-    const data = JSON.parse(
-        localStorage.getItem("netballLive")
-    );
+    // Dengar perubahan data secara LIVE dari Firebase Realtime Database
+    database.ref('netballLive').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
 
-    if(!data) return;
-
-    document.getElementById("teamA").innerText =
-    data.teamA;
-
-    document.getElementById("teamB").innerText =
-    data.teamB;
-
-    document.getElementById("scoreA").innerText =
-    data.scoreA;
-
-    document.getElementById("scoreB").innerText =
-    data.scoreB;
-
-    document.getElementById("status").innerText =
-    data.status;
-
-    document.getElementById("timer").innerText =
-    data.timer;
-
-}
-
-loadData();
-
-setInterval(loadData,500);
-
+        // Kemaskini teks pada skrin secara automatik tanpa refresh halaman
+        if(data.matchNumber && document.getElementById("matchNumber")) {
+            document.getElementById("matchNumber").innerText = data.matchNumber;
+        }
+        if(document.getElementById("teamA")) document.getElementById("teamA").innerText = data.teamA;
+        if(document.getElementById("teamB")) document.getElementById("teamB").innerText = data.teamB;
+        if(document.getElementById("scoreA")) document.getElementById("scoreA").innerText = data.scoreA;
+        if(document.getElementById("scoreB")) document.getElementById("scoreB").innerText = data.scoreB;
+        if(document.getElementById("status")) document.getElementById("status").innerText = data.status;
+        if(document.getElementById("timer")) document.getElementById("timer").innerText = data.timer;
+    });
 </script>
 
 </body>
