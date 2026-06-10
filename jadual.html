@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadual Perlawanan Bola Jaring</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: white;
+            background-image: url("background.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Seksyen Utama Jadual Perlawanan & Kumpulan */
+        .schedule-section {
+            width: 95%;
+            max-width: 1200px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 35px 30px;
+            border-radius: 30px;
+            box-sizing: border-box;
+            border: 2px solid rgba(255, 217, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        .main-title {
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: 3rem;
+            color: #FFD700;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            text-transform: uppercase;
+        }
+
+        .sub-title {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 1.3rem;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+
+        .section-title {
+            font-family: 'Impact', sans-serif;
+            font-size: 2rem;
+            color: #FFD700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(255, 217, 0, 0.3);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Tab Sistem untuk Tarikh Perlawanan */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 217, 0, 0.2);
+            border-color: #FFD700;
+        }
+
+        .tab-btn.active {
+            background: #FFD700;
+            color: #000;
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Gaya Jadual (Table) */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: #1e293b;
+            color: #FFD700;
+            font-family: 'Arial Black', sans-serif;
+            text-transform: uppercase;
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border-bottom: 3px solid #FFD700;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(30, 41, 59, 0.4);
+        }
+
+        tr:hover td {
+            background: rgba(255, 217, 0, 0.05);
+        }
+
+        .match-id {
+            font-weight: bold;
+            color: #cbd5e1;
+            text-align: center;
+            width: 60px;
+        }
+
+        .time-cell {
+            font-family: monospace;
+            font-size: 1.05rem;
+            color: #2ecc71;
+            font-weight: bold;
+            width: 90px;
+            text-align: center;
+        }
+
+        .vs-cell {
+            text-align: center;
+            font-weight: bold;
+            font-style: italic;
+            color: #ef4444;
+            width: 50px;
+        }
+
+        .team-cell {
+            font-weight: 600;
+            width: 40%;
+        }
+
+        .team-cell.right-align {
+            text-align: right;
+        }
+
+        /* Kemasan Warna mengikut Kumpulan */
+        .bg-group-a { border-left: 4px solid #3b82f6; }
+        .bg-group-b { border-left: 4px solid #f97316; }
+        .bg-group-c { border-left: 4px solid #a855f7; }
+        .bg-group-d { border-left: 4px solid #10b981; }
+        .bg-knockout { border-left: 4px solid #eab308; background: rgba(234, 179, 8, 0.05) !important; }
+
+        /* Grid Komponen Info Kumpulan */
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .group-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .group-card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-align: center;
+            color: #FFD700;
+            font-family: 'Arial Black', sans-serif;
+            border-bottom: 2px solid rgba(255,217,0,0.3);
+            padding-bottom: 6px;
+            font-size: 1.1rem;
+        }
+
+        .group-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .group-card li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .group-card li:last-child {
+            border-bottom: none;
+        }
+
+        .code-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            color: #cbd5e1;
+            font-family: monospace;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 992px) {
+            .groups-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2rem;
+            }
+            .sub-title {
+                font-size: 1rem;
+                margin-bottom: 25px;
+            }
+            .schedule-section {
+                padding: 20px 15px;
+                border-radius: 20px;
+            }
+            .tab-btn {
+                padding: 10px 18px;
+                font-size: 0.85rem;
+            }
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            .time-cell {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="schedule-section">
+        
+        <!-- Tajuk Kejohanan Utama -->
+        <div class="main-title">Kejohanan Bola Jaring</div>
+        <div class="sub-title">Piala KP Selangor 2026</div>
+        
+        <div class="section-title">Carta Kumpulan</div>
+        
+        <div class="groups-grid">
+            <!-- Kumpulan A -->
+            <div class="group-card">
+                <h3>Kumpulan A</h3>
+                <ul>
+                    <li><span class="code-tag">A1</span> IPD Kajang</li>
+                    <li><span class="code-tag">A2</span> IPD Kuala Selangor</li>
+                    <li><span class="code-tag">A3</span> IPD Sepang</li>
+                    <li><span class="code-tag">A4</span> IPD Ampang Jaya</li>
+                </ul>
+            </div>
+            <!-- Kumpulan B -->
+            <div class="group-card">
+                <h3>Kumpulan B</h3>
+                <ul>
+                    <li><span class="code-tag">B1</span> IPD Serdang</li>
+                    <li><span class="code-tag">B2</span> IPK Selangor</li>
+                    <li><span class="code-tag">B3</span> IPD Kuala Langat</li>
+                    <li><span class="code-tag">B4</span> IPD Klang Utara</li>
+                </ul>
+            </div>
+            <!-- Kumpulan C -->
+            <div class="group-card">
+                <h3>Kumpulan C</h3>
+                <ul>
+                    <li><span class="code-tag">C1</span> IPD Klang Selatan</li>
+                    <li><span class="code-tag">C2</span> IPD Sabak Bernam</li>
+                    <li><span class="code-tag">C3</span> IPD Hulu Selangor</li>
+                    <li><span class="code-tag">C4</span> IPD Shah Alam</li>
+                </ul>
+            </div>
+            <!-- Kumpulan D -->
+            <div class="group-card">
+                <h3>Kumpulan D</h3>
+                <ul>
+                    <li><span class="code-tag">D1</span> IPD KLIA</li>
+                    <li><span class="code-tag">D2</span> IPD Subang Jaya</li>
+                    <li><span class="code-tag">D3</span> IPD Sungai Buloh</li>
+                    <li><span class="code-tag">D4</span> IPD Gombak</li>
+                    <li><span class="code-tag">D5</span> IPD Petaling Jaya</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-title">Jadual Perlawanan</div>
+
+        <!-- Tab Tarikh Kejohanan -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openDay(event, 'day1')">23 JUN 2026 (SELASA)</button>
+            <button class="tab-btn" onclick="openDay(event, 'day2')">24 JUN 2026 (RABU)</button>
+            <button class="tab-btn" onclick="openDay(event, 'day3')">25 JUN 2026 (KHAMIS)</button>
+            <button class="tab-btn" onclick="openDay(event, 'day4')">26 JUN 2026 (JUMAAT)</button>
+        </div>
+
+        <!-- HARI 1: 23 JUN 2026 -->
+        <div id="day1" class="tab-content active">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">No</th>
+                            <th style="text-align:center;">Masa</th>
+                            <th style="text-align:right; width:40%;">Pasukan 1</th>
+                            <th style="text-align:center;">VS</th>
+                            <th style="text-align:left; width:40%;">Pasukan 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="match-id">1</td>
+                            <td class="time-cell">08:30</td>
+                            <td class="team-cell right-align bg-group-a">IPD Kajang <span class="code-tag" style="margin-left:5px; margin-right:0;">A1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-a"><span class="code-tag">A2</span> IPD Kuala Selangor</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">2</td>
+                            <td class="time-cell">09:00</td>
+                            <td class="team-cell right-align bg-group-a">IPD Sepang <span class="code-tag" style="margin-left:5px; margin-right:0;">A3</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-a"><span class="code-tag">A4</span> IPD Ampang Jaya</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">3</td>
+                            <td class="time-cell">09:30</td>
+                            <td class="team-cell right-align bg-group-c">IPD Klang Selatan <span class="code-tag" style="margin-left:5px; margin-right:0;">C1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-c"><span class="code-tag">C2</span> IPD Sabak Bernam</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">4</td>
+                            <td class="time-cell">10:00</td>
+                            <td class="team-cell right-align bg-group-c">IPD Hulu Selangor <span class="code-tag" style="margin-left:5px; margin-right:0;">C3</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-c"><span class="code-tag">C4</span> IPD Shah Alam</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">5</td>
+                            <td class="time-cell">10:30</td>
+                            <td class="team-cell right-align bg-group-a">IPD Kajang <span class="code-tag" style="margin-left:5px; margin-right:0;">A1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-a"><span class="code-tag">A3</span> IPD Sepang</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">6</td>
+                            <td class="time-cell">11:30</td>
+                            <td class="team-cell right-align bg-group-a">IPD Kuala Selangor <span class="code-tag" style="margin-left:5px; margin-right:0;">A2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-a"><span class="code-tag">A4</span> IPD Ampang Jaya</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">7</td>
+                            <td class="time-cell">12:00</td>
+                            <td class="team-cell right-align bg-group-c">IPD Klang Selatan <span class="code-tag" style="margin-left:5px; margin-right:0;">C1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-c"><span class="code-tag">C3</span> IPD Hulu Selangor</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">8</td>
+                            <td class="time-cell">12:30</td>
+                            <td class="team-cell right-align bg-group-c">IPD Sabak Bernam <span class="code-tag" style="margin-left:5px; margin-right:0;">C2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-c"><span class="code-tag">C4</span> IPD Shah Alam</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">9</td>
+                            <td class="time-cell">13:00</td>
+                            <td class="team-cell right-align bg-group-d">IPD KLIA <span class="code-tag" style="margin-left:5px; margin-right:0;">D1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D4</span> IPD Gombak</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">10</td>
+                            <td class="time-cell">13:30</td>
+                            <td class="team-cell right-align bg-group-d">IPD Subang Jaya <span class="code-tag" style="margin-left:5px; margin-right:0;">D2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D5</span> IPD Petaling Jaya</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">11</td>
+                            <td class="time-cell">14:00</td>
+                            <td class="team-cell right-align bg-group-a">IPD Kajang <span class="code-tag" style="margin-left:5px; margin-right:0;">A1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-a"><span class="code-tag">A4</span> IPD Ampang Jaya</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">12</td>
+                            <td class="time-cell">14:30</td>
+                            <td class="team-cell right-align bg-group-a">IPD Kuala Selangor <span class="code-tag" style="margin-left:5px; margin-right:0;">A2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-a"><span class="code-tag">A3</span> IPD Sepang</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">13</td>
+                            <td class="time-cell">15:00</td>
+                            <td class="team-cell right-align bg-group-c">IPD Klang Selatan <span class="code-tag" style="margin-left:5px; margin-right:0;">C1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-c"><span class="code-tag">C4</span> IPD Shah Alam</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">14</td>
+                            <td class="time-cell">15:30</td>
+                            <td class="team-cell right-align bg-group-c">IPD Sabak Bernam <span class="code-tag" style="margin-left:5px; margin-right:0;">C2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-c"><span class="code-tag">C3</span> IPD Hulu Selangor</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HARI 2: 24 JUN 2026 -->
+        <div id="day2" class="tab-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">No</th>
+                            <th style="text-align:center;">Masa</th>
+                            <th style="text-align:right; width:40%;">Pasukan 1</th>
+                            <th style="text-align:center;">VS</th>
+                            <th style="text-align:left; width:40%;">Pasukan 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="match-id">15</td>
+                            <td class="time-cell">08:30</td>
+                            <td class="team-cell right-align bg-group-d">IPD KLIA <span class="code-tag" style="margin-left:5px; margin-right:0;">D1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D2</span> IPD Subang Jaya</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">16</td>
+                            <td class="time-cell">09:00</td>
+                            <td class="team-cell right-align bg-group-d">IPD Sungai Buloh <span class="code-tag" style="margin-left:5px; margin-right:0;">D3</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D4</span> IPD Gombak</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">17</td>
+                            <td class="time-cell">09:30</td>
+                            <td class="team-cell right-align bg-group-b">IPD Serdang <span class="code-tag" style="margin-left:5px; margin-right:0;">B1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-b"><span class="code-tag">B2</span> IPK Selangor</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">18</td>
+                            <td class="time-cell">10:00</td>
+                            <td class="team-cell right-align bg-group-b">IPD Kuala Langat <span class="code-tag" style="margin-left:5px; margin-right:0;">B3</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-b"><span class="code-tag">B4</span> IPD Klang Utara</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">19</td>
+                            <td class="time-cell">10:30</td>
+                            <td class="team-cell right-align bg-group-d">IPD Petaling Jaya <span class="code-tag" style="margin-left:5px; margin-right:0;">D5</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D1</span> IPD KLIA</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">20</td>
+                            <td class="time-cell">11:30</td>
+                            <td class="team-cell right-align bg-group-d">IPD Subang Jaya <span class="code-tag" style="margin-left:5px; margin-right:0;">D2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D3</span> IPD Sungai Buloh</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">21</td>
+                            <td class="time-cell">12:00</td>
+                            <td class="team-cell right-align bg-group-b">IPD Serdang <span class="code-tag" style="margin-left:5px; margin-right:0;">B1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-b"><span class="code-tag">B3</span> IPD Kuala Langat</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">22</td>
+                            <td class="time-cell">12:30</td>
+                            <td class="team-cell right-align bg-group-b">IPK Selangor <span class="code-tag" style="margin-left:5px; margin-right:0;">B2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-b"><span class="code-tag">B4</span> IPD Klang Utara</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">23</td>
+                            <td class="time-cell">13:00</td>
+                            <td class="team-cell right-align bg-group-d">IPD Gombak <span class="code-tag" style="margin-left:5px; margin-right:0;">D4</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D5</span> IPD Petaling Jaya</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">24</td>
+                            <td class="time-cell">13:30</td>
+                            <td class="team-cell right-align bg-group-d">IPD KLIA <span class="code-tag" style="margin-left:5px; margin-right:0;">D1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D3</span> IPD Sungai Buloh</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">25</td>
+                            <td class="time-cell">14:00</td>
+                            <td class="team-cell right-align bg-group-b">IPD Serdang <span class="code-tag" style="margin-left:5px; margin-right:0;">B1</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-b"><span class="code-tag">B4</span> IPD Klang Utara</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">26</td>
+                            <td class="time-cell">14:30</td>
+                            <td class="team-cell right-align bg-group-b">IPK Selangor <span class="code-tag" style="margin-left:5px; margin-right:0;">B2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-b"><span class="code-tag">B3</span> IPD Kuala Langat</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">27</td>
+                            <td class="time-cell">15:00</td>
+                            <td class="team-cell right-align bg-group-d">IPD Subang Jaya <span class="code-tag" style="margin-left:5px; margin-right:0;">D2</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D4</span> IPD Gombak</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">28</td>
+                            <td class="time-cell">15:30</td>
+                            <td class="team-cell right-align bg-group-d">IPD Petaling Jaya <span class="code-tag" style="margin-left:5px; margin-right:0;">D5</span></td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-group-d"><span class="code-tag">D3</span> IPD Sungai Buloh</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HARI 3: 25 JUN 2026 -->
+        <div id="day3" class="tab-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="5" style="background:#0f172a; text-align:center; color:#FFD700; border-bottom: 2px solid #eab308;">PERINGKAT SUKU AKHIR</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">No</th>
+                            <th style="text-align:center;">Masa</th>
+                            <th style="text-align:right; width:40%;">Pasukan 1</th>
+                            <th style="text-align:center;">VS</th>
+                            <th style="text-align:left; width:40%;">Pasukan 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="match-id">29</td>
+                            <td class="time-cell">08:30</td>
+                            <td class="team-cell right-align bg-knockout">JOHAN KUMPULAN A</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout">NAIB JOHAN KUMPULAN C</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">30</td>
+                            <td class="time-cell">09:00</td>
+                            <td class="team-cell right-align bg-knockout">JOHAN KUMPULAN D</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout">NAIB JOHAN KUMPULAN B</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">31</td>
+                            <td class="time-cell">09:30</td>
+                            <td class="team-cell right-align bg-knockout">JOHAN KUMPULAN B</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout">NAIB JOHAN KUMPULAN D</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">32</td>
+                            <td class="time-cell">10:00</td>
+                            <td class="team-cell right-align bg-knockout">JOHAN KUMPULAN C</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout">NAIB JOHAN KUMPULAN A</td>
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th colspan="5" style="background:#0f172a; text-align:center; color:#FFD700; border-bottom: 2px solid #eab308;">PERINGKAT SEPARUH AKHIR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="match-id">33</td>
+                            <td class="time-cell">12:00</td>
+                            <td class="team-cell right-align bg-knockout">PEMENANG PERLAWANAN 29</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout">PEMENANG PERLAWANAN 30</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">34</td>
+                            <td class="time-cell">12:30</td>
+                            <td class="team-cell right-align bg-knockout">PEMENANG PERLAWANAN 31</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout">PEMENANG PERLAWANAN 32</td>
+                        </tr>
+                        <tr>
+                            <td class="match-id">35</td>
+                            <td class="time-cell">14:00</td>
+                            <td class="team-cell right-align bg-knockout" style="color: #94a3b8;">KALAH PERLAWANAN 33 (TEMPAT KE-3/4)</td>
+                            <td class="vs-cell">VS</td>
+                            <td class="team-cell bg-knockout" style="color: #94a3b8;">KALAH PERLAWANAN 34 (TEMPAT KE-3/4)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HARI 4: 26 JUN 2026 -->
+        <div id="day4" class="tab-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="5" style="background:#0f172a; text-align:center; color:#FFD700; border-bottom: 2px solid #eab308;">PERINGKAT AKHIR (FINALS)</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">No</th>
+                            <th style="text-align:center;">Masa</th>
+                            <th style="text-align:right; width:40%;">Pasukan 1</th>
+                            <th style="text-align:center;">VS</th>
+                            <th style="text-align:left; width:40%;">Pasukan 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="match-id">36</td>
+                            <td class="time-cell">15:00</td>
+                            <td class="team-cell right-align bg-knockout" style="font-size:1.1rem; color:#FFD700;">PEMENANG PERLAWANAN 33</td>
+                            <td class="vs-cell" style="font-size:1.2rem;">VS</td>
+                            <td class="team-cell bg-knockout" style="font-size:1.1rem; color:#FFD700;">PEMENANG PERLAWANAN 34</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fungsi untuk menukar Tab Jadual Perlawanan
+    function openDay(evt, dayName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(dayName).style.display = "block";
+        document.getElementById(dayName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+
+</body>
+</html>
