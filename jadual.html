@@ -798,6 +798,38 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
+    // Mapping statik kod tag perlawanan 1-28 berasaskan susunan Carta Kumpulan sebenar
+    const matchTags = {
+        1:  { a: "A1", b: "A2" },
+        2:  { a: "A3", b: "A4" },
+        3:  { a: "C1", b: "C2" },
+        4:  { a: "C3", b: "C4" },
+        5:  { a: "A1", b: "A3" },
+        6:  { a: "A2", b: "A4" },
+        7:  { a: "C1", b: "C3" },
+        8:  { a: "C2", b: "C4" },
+        9:  { a: "D1", b: "D4" },
+        10: { a: "D2", b: "D5" },
+        11: { a: "A1", b: "A4" },
+        12: { a: "A2", b: "A3" },
+        13: { a: "C1", b: "C4" },
+        14: { a: "C2", b: "C3" },
+        15: { a: "D1", b: "D2" },
+        16: { a: "D3", b: "D4" },
+        17: { a: "B1", b: "B2" },
+        18: { a: "B3", b: "B4" },
+        19: { a: "D5", b: "D1" },
+        20: { a: "D2", b: "D3" },
+        21: { a: "B1", b: "B3" },
+        22: { a: "B2", b: "B4" },
+        23: { a: "D4", b: "D5" },
+        24: { a: "D1", b: "D3" },
+        25: { a: "B1", b: "B4" },
+        26: { a: "B2", b: "B3" },
+        27: { a: "D2", b: "D4" },
+        28: { a: "D5", b: "D3" }
+    };
+
     // Membaca senarai keputusan perlawanan secara real-time dari nod 'perlawananList'
     database.ref('perlawananList').on('value', (snapshot) => {
         const list = snapshot.val();
@@ -807,27 +839,20 @@
         for(let i = 1; i <= 36; i++) {
             const matchData = list[i];
             if(matchData) {
-                // 1. Kemas kini nama pasukan secara dinamik (terutama bagi peringkat kalah mati)
                 const elTeamA = document.getElementById("teamA_" + i);
                 const elTeamB = document.getElementById("teamB_" + i);
                 
+                // 1. Kemas kini nama pasukan berserta kod tag kumpulan yang TEPAT
                 if(elTeamA) {
-                    if(i <= 14) {
-                        elTeamA.innerHTML = `${matchData.teamA} <span class="code-tag" style="margin-left:5px; margin-right:0;">A${i % 2 === 0 ? 2 : 1}</span>`; 
-                    } else if (i >= 15 && i <= 28) {
-                        let codeA = i === 15 || i === 24 ? 'D1' : (i === 16 ? 'D3' : (i === 17 || i === 21 || i === 25 ? 'B1' : (i === 18 ? 'B3' : (i === 19 ? 'D5' : (i === 20 || i === 27 ? 'D2' : (i === 22 || i === 26 ? 'B2' : 'D4'))))));
-                        elTeamA.innerHTML = `${matchData.teamA} <span class="code-tag" style="margin-left:5px; margin-right:0;">${codeA}</span>`;
+                    if(i <= 28 && matchTags[i]) {
+                        elTeamA.innerHTML = `${matchData.teamA} <span class="code-tag" style="margin-left:5px; margin-right:0;">${matchTags[i].a}</span>`; 
                     } else {
                         elTeamA.innerText = matchData.teamA;
                     }
                 }
                 if(elTeamB) {
-                    if(i <= 14) {
-                        elTeamB.innerHTML = `<span class="code-tag">A${i % 2 === 0 ? 4 : 2}</span> ${matchData.teamB}`;
-                    } else if (i >= 15 && i <= 28) {
-                        let codeB = i === 15 || i === 20 ? 'D2' : (i === 16 || i === 18 || i === 22 || i === 25 ? 'B4' : (i === 17 || i === 26 ? 'B2' : (i === 19 || i === 24 || i === 28 ? 'D1' : (i === 21 || i === 26 ? 'B3' : 'D5'))));
-                        if(i===15) codeB='D2'; if(i===16) codeB='D4'; if(i===17) codeB='B2'; if(i===18) codeB='B4'; if(i===19) codeB='D1'; if(i===20) codeB='D3'; if(i===21) codeB='B3'; if(i===22) codeB='B4'; if(i===23) codeB='D5'; if(i===24) codeB='D3'; if(i===25) codeB='B4'; if(i===26) codeB='B3'; if(i===27) codeB='D4'; if(i===28) codeB='D3';
-                        elTeamB.innerHTML = `<span class="code-tag">${codeB}</span> ${matchData.teamB}`;
+                    if(i <= 28 && matchTags[i]) {
+                        elTeamB.innerHTML = `<span class="code-tag">${matchTags[i].b}</span> ${matchData.teamB}`;
                     } else {
                         elTeamB.innerText = matchData.teamB;
                     }
@@ -841,7 +866,6 @@
                     } else if(matchData.status === "LIVE") {
                         elScore.innerHTML = `<span class="score-box" style="color:#2ecc71; border-color:#2ecc71;">${matchData.scoreA} - ${matchData.scoreB}</span><span class="live-indicator">● LIVE</span>`;
                     } else {
-                        // Jika status BELUM MULA, kekalkan paparan teks VS asal anda
                         elScore.innerHTML = `VS`;
                     }
                 }
