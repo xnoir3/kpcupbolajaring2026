@@ -13,235 +13,321 @@
         .admin-box { max-width: 600px; margin: 40px auto; background: #18233d; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         h2 { text-align: center; margin-top: 0; color: #FFD700; }
         .match-box { background: #1f2d4d; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #2a3b63; margin-bottom: 15px; }
-        .flex-row { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 15px; }
-        .card { flex: 1; background: #1f2d4d; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #2a3b63; }
-        input[type="text"], select { width: 90%; padding: 10px; font-size: 16px; font-weight: bold; text-align: center; border: 1px solid #3a4b73; border-radius: 8px; background: #0b1020; color: white; }
-        .display-score { font-size: 55px; font-weight: bold; margin: 15px 0; color: #FFD700; }
-        .btn { padding: 10px 14px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; margin: 4px 2px; }
-        .btn-plus { background: #2ecc71; color: white; }
-        .btn-minus { background: #e74c3c; color: white; }
-        .btn-control { background: #34495e; color: white; width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; border-radius: 8px; font-weight: bold; }
-        .time-box { text-align: center; margin: 20px 0; padding: 15px; background: #0b1020; border-radius: 12px; border: 1px solid #2a3b63; }
-        #timer { font-size: 45px; font-weight: bold; font-family: monospace; color: #2ecc71; }
-        #status { font-weight: bold; color: #a4b3d6; text-transform: uppercase; letter-spacing: 1px; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px; }
+        .team-input-box { flex: 1; text-align: center; }
+        .team-input-box label { display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #34495e; background: #0f172a; color: white; box-sizing: border-box; font-size: 1rem; }
+        .score-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
+        .score-btn { background: #34495e; border: none; color: white; padding: 10px 15px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; min-width: 45px; }
+        .score-btn:hover { background: #4b6584; }
+        .score-btn.plus { background: #2ecc71; color: white; }
+        .score-btn.plus:hover { background: #27ae60; }
+        .score-display { font-size: 2.5rem; font-family: 'Impact', sans-serif; color: #FFD700; min-width: 60px; text-align: center; background: #0f172a; padding: 5px 10px; border-radius: 10px; border: 1px solid #2a3b63; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .btn-green { background: #2ecc71; color: white; } .btn-green:hover { background: #27ae60; }
+        .btn-red { background: #e74c3c; color: white; } .btn-red:hover { background: #c0392b; }
+        .btn-yellow { background: #f1c40f; color: black; } .btn-yellow:hover { background: #d4ac0d; }
+        .btn-blue { background: #3498db; color: white; } .btn-blue:hover { background: #2980b9; }
+        .status-badge { font-weight: bold; font-size: 1.2rem; padding: 6px 15px; border-radius: 50px; background: #7f8c8d; display: inline-block; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .status-badge.live { background: #2ecc71; color: white; animation: blink 1s infinite alternate; }
+        .status-badge.tamat { background: #e74c3c; color: white; }
+        @keyframes blink { from { opacity: 0.6; } to { opacity: 1; } }
+        .timer-display { font-size: 3rem; font-family: monospace; font-weight: bold; color: #2ecc71; margin: 10px 0; text-shadow: 0 0 10px rgba(46,204,113,0.3); }
+        .manual-timer { max-width: 120px; text-align: center; font-family: monospace; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="admin-box">
-    <h2>PANEL KAWALAN ADMIN</h2>
+    <h2>KEMAS KINI PERLAWANAN BOLA JARING</h2>
     
-    <div class="match-box">
-        <label style="display:block; margin-bottom:8px; font-weight:bold; color:#a4b3d6;">PILIH NO. PERLAWANAN:</label>
-        <select id="matchSelect" onchange="loadSelectedMatch()">
-            </select>
+    <div style="margin-bottom: 15px;">
+        <label style="display:block; margin-bottom:5px; font-weight:bold; color:#FFD700;">Pilih Perlawanan:</label>
+        <select id="matchSelect" onchange="loadMatchSetup()">
+            <script>
+                for(let i=1; i<=36; i++){
+                    document.write(`<option value="${i}">Perlawanan ${i}</option>`);
+                }
+            </script>
+        </select>
     </div>
 
     <div class="flex-row">
-        <div class="card">
-            <input type="text" id="teamA" value="PASUKAN A">
-            <div class="display-score" id="scoreA">0</div>
-            <button class="btn btn-plus" onclick="changeScore('A', 1)">+1</button>
-            <button class="btn btn-plus" style="background: #27ae60;" onclick="changeScore('A', 2)">+2</button>
-            <button class="btn btn-plus" style="background: #16a085;" onclick="changeScore('A', 3)">+3</button>
-            <button class="btn btn-minus" onclick="changeScore('A', -1)">-1</button>
+        <div class="team-input-box">
+            <label>Nama Pasukan 1 (A)</label>
+            <input type="text" id="teamA" placeholder="Contoh: IPD KLIA [D1]">
         </div>
+        <div style="font-weight:bold; color:#e74c3c; margin-top:20px;">VS</div>
+        <div class="team-input-box">
+            <label>Nama Pasukan 2 (B)</label>
+            <input type="text" id="teamB" placeholder="Contoh: IPD SUBANG JAYA [D2]">
+        </div>
+    </div>
+
+    <div class="match-box">
+        <div>STATUS PERLAWANAN</div>
+        <div id="status" class="status-badge">BELUM MULA</div>
+        <div class="timer-display" id="timer">10:00</div>
         
-        <div class="card">
-            <input type="text" id="teamB" value="PASUKAN B">
-            <div class="display-score" id="scoreB">0</div>
-            <button class="btn btn-plus" onclick="changeScore('B', 1)">+1</button>
-            <button class="btn btn-plus" style="background: #27ae60;" onclick="changeScore('B', 2)">+2</button>
-            <button class="btn btn-plus" style="background: #16a085;" onclick="changeScore('B', 3)">+3</button>
-            <button class="btn btn-minus" onclick="changeScore('B', -1)">-1</button>
+        <div style="display: flex; justify-content: center; gap: 8px; align-items: center; margin-top: 5px;">
+            <input type="text" id="manualTimeInput" class="manual-timer" placeholder="10:00">
+            <button class="score-btn" onclick="setManualTime()" style="font-size:0.9rem; padding:8px 12px;">Set Masa</button>
         </div>
     </div>
 
-    <div class="time-box">
-        <div id="status">SEPARUH MASA PERTAMA</div>
-        <div id="timer">10:00</div>
+    <div class="match-box">
+        <div style="font-weight:bold; color:#3498db; margin-bottom:10px;" id="lblTeamA">PASUKAN 1 (A)</div>
+        <div class="score-container">
+            <button class="score-btn" onclick="changeScore('A', -1)">-1</button>
+            <div class="score-display" id="scoreA">0</div>
+            <button class="score-btn plus" onclick="changeScore('A', 1)">+1</button>
+        </div>
     </div>
 
-    <button class="btn btn-control" style="background:#27ae60;" onclick="startTimer()">MULA PEMASA (START)</button>
-    <button class="btn btn-control" style="background:#f39c12;" onclick="pauseTimer()">HENTI SEKETIKA (PAUSE)</button>
-    <button class="btn btn-control" style="background:#2980b9;" onclick="nextPhase()">FASA SETERUSNYA (NEXT PHASE)</button>
-    <button class="btn btn-control" style="background:#c0392b;" onclick="resetTimer()">RESET SEMUA (RESET)</button>
-    <button class="btn btn-control" style="background:#8e44ad;" onclick="setupDefaultJadual()">SETUP JADUAL ASAL (KLIK SEKALI SAHAJA)</button>
+    <div class="match-box">
+        <div style="font-weight:bold; color:#f97316; margin-bottom:10px;" id="lblTeamB">PASUKAN 2 (B)</div>
+        <div class="score-container">
+            <button class="score-btn" onclick="changeScore('B', -1)">-1</button>
+            <div class="score-display" id="scoreB">0</div>
+            <button class="score-btn plus" onclick="changeScore('B', 1)">+1</button>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="action-btn btn-green" onclick="startMatch()">MULA / LIVE</button>
+        <button class="action-btn btn-yellow" onclick="pauseTimer()">PAUSE MASA</button>
+    </div>
+    <div class="btn-group">
+        <button class="action-btn btn-blue" onclick="triggerRest()">REHAT (10 MIN)</button>
+        <button class="action-btn btn-red" onclick="endMatch()">TAMAT PERLAWANAN</button>
+    </div>
+    <div style="margin-top: 15px;">
+        <button class="action-btn" onclick="resetAllFields()" style="background:#7f8c8d; color:white;">RESET SEMUA SKOR & MASA</button>
+    </div>
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA_r3S48RffSWJ5Zfx6DuNbLsQe1NiqxNk",
-  authDomain: "kpcupbolajaring2026.firebaseapp.com",
-  projectId: "kpcupbolajaring2026",
-  storageBucket: "kpcupbolajaring2026.firebasestorage.app",
-  messagingSenderId: "1003385616201",
-  appId: "1:1003385616201:web:6d475aa234b96380a78c98",
-  measurementId: "G-RQ793SKH7C",
-  databaseURL: "https://kpcupbolajaring2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
-};
+    // DATASET JADUAL TERKINI IKUT DOKUMEN RASMI (PERLAWANAN 1 - 36)
+    const matchTeams = {
+        1: { a: "IPD KLIA [D1]", b: "IPD SUBANG JAYA [D2]" },
+        2: { a: "IPD SUNGAI BULOH [D3]", b: "IPD GOMBAK [D4]" },
+        3: { a: "IPD KAJANG [A1]", b: "IPD KUALA SELANGOR [A2]" },
+        4: { a: "IPD SERDANG [B1]", b: "IPK SELANGOR [B2]" },
+        5: { a: "IPD KLANG S [C1]", b: "IPD SABAK BERNAM [C2]" },
+        6: { a: "IPD PETALING JAYA [D5]", b: "IPD KLIA [D1]" },
+        7: { a: "IPD SUBANG JAYA [D2]", b: "IPD SUNGAI BULOH [D3]" },
+        8: { a: "IPD SEPANG [A3]", b: "IPD AMPANG JAYA [A4]" },
+        9: { a: "IPD KUALA LANGAT [B3]", b: "IPD KLANG UTARA [B4]" },
+        10: { a: "IPD HULU SELANGOR [C3]", b: "IPD SHAH ALAM [C4]" },
+        11: { a: "IPD GOMBAK [D4]", b: "IPD PETALING JAYA [D5]" },
+        12: { a: "IPD KAJANG [A1]", b: "IPD SEPANG [A3]" },
+        13: { a: "IPD SERDANG [B1]", b: "IPD KUALA LANGAT [B3]" },
+        14: { a: "IPD KLANG S [C1]", b: "IPD HULU SELANGOR [C3]" },
+        15: { a: "IPD KUALA SELANGOR [A2]", b: "IPD AMPANG JAYA [A4]" },
+        16: { a: "IPK SELANGOR [B2]", b: "IPD KLANG UTARA [B4]" },
+        17: { a: "IPD SABAK BERNAM [C2]", b: "IPD SHAH ALAM [C4]" },
+        18: { a: "IPD KLIA [D1]", b: "IPD SUNGAI BULOH [D3]" },
+        19: { a: "IPD SUBANG JAYA [D2]", b: "IPD PETALING JAYA [D5]" },
+        20: { a: "IPD KAJANG [A1]", b: "IPD AMPANG JAYA [A4]" },
+        21: { a: "IPD SERDANG [B1]", b: "IPD KLANG UTARA [B4]" },
+        22: { a: "IPD KLANG S [C1]", b: "IPD SHAH ALAM [C4]" },
+        23: { a: "IPD GOMBAK [D4]", b: "IPD KLIA [D1]" },
+        24: { a: "IPD SUNGAI BULOH [D3]", b: "IPD PETALING JAYA [D5]" },
+        25: { a: "IPD KUALA SELANGOR [A2]", b: "IPD SEPANG [A3]" },
+        26: { a: "IPK SELANGOR [B2]", b: "IPD KUALA LANGAT [B3]" },
+        27: { a: "IPD SABAK BERNAM [C2]", b: "IPD HULU SELANGOR [C3]" },
+        28: { a: "IPD SUBANG JAYA [D2]", b: "IPD GOMBAK [D4]" },
+        // PERINGKAT KALAH MATI (SUKU AKHIR)
+        29: { a: "JOHAN KUMPULAN A", b: "NAIB JOHAN KUMPULAN C" },
+        30: { a: "JOHAN KUMPULAN D", b: "NAIB JOHAN KUMPULAN B" },
+        31: { a: "JOHAN KUMPULAN B", b: "NAIB JOHAN KUMPULAN D" },
+        32: { a: "JOHAN KUMPULAN C", b: "NAIB JOHAN KUMPULAN A" },
+        // SEPARUH AKHIR & AKHIR
+        33: { a: "PEMENANG PERLAWANAN 29", b: "PEMENANG PERLAWANAN 30" },
+        34: { a: "PEMENANG PERLAWANAN 31", b: "PEMENANG PERLAWANAN 32" },
+        35: { a: "KALAH PERLAWANAN 33 (3/4)", b: "KALAH PERLAWANAN 34 (3/4)" },
+        36: { a: "PEMENANG PERLAWANAN 33", b: "PEMENANG PERLAWANAN 34" }
+    };
 
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+    // KONFIGURASI FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_r3S48RffSWJ5Zfx6DuNbLsQe1NiqxNk",
+        authDomain: "kpcupbolajaring2026.firebaseapp.com",
+        projectId: "kpcupbolajaring2026",
+        storageBucket: "kpcupbolajaring2026.firebasestorage.app",
+        messagingSenderId: "1003385616201",
+        appId: "1:1003385616201:web:6d475aa234b96380a78c98",
+        measurementId: "G-RQ793SKH7C",
+        databaseURL: "https://kpcupbolajaring2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
 
-let scoreA = 0;
-let scoreB = 0;
-let phase = 1;
-let seconds = 600; 
-let timerInterval;
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-// Senarai Data Jadual Asal Mengikut Gambar Anda
-const jadualAsal = {
-    1: { hari: "23 JUN 2026 (SELASA)", masa: "08:30", teamA: "IPD Kajang", teamB: "IPD Kuala Selangor", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    2: { hari: "23 JUN 2026 (SELASA)", masa: "09:00", teamA: "IPD Sepang", teamB: "IPD Ampang Jaya", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    3: { hari: "23 JUN 2026 (SELASA)", masa: "09:30", teamA: "IPD Klang Selatan", teamB: "IPD Sabak Bernam", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    4: { hari: "23 JUN 2026 (SELASA)", masa: "10:00", teamA: "IPD Hulu Selangor", teamB: "IPD Shah Alam", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    5: { hari: "23 JUN 2026 (SELASA)", masa: "10:30", teamA: "IPD Kajang", teamB: "IPD Sepang", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    6: { hari: "23 JUN 2026 (SELASA)", masa: "11:30", teamA: "IPD Kuala Selangor", teamB: "IPD Ampang Jaya", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    7: { hari: "23 JUN 2026 (SELASA)", masa: "12:00", teamA: "IPD Klang Selatan", teamB: "IPD Hulu Selangor", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    8: { hari: "23 JUN 2026 (SELASA)", masa: "12:30", teamA: "IPD Sabak Bernam", teamB: "IPD Shah Alam", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    9: { hari: "23 JUN 2026 (SELASA)", masa: "13:00", teamA: "IPD KLIA", teamB: "IPD Gombak", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    10: { hari: "23 JUN 2026 (SELASA)", masa: "13:30", teamA: "IPD Subang Jaya", teamB: "IPD Petaling Jaya", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    11: { hari: "23 JUN 2026 (SELASA)", masa: "14:00", teamA: "IPD Kajang", teamB: "IPD Ampang Jaya", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    12: { hari: "23 JUN 2026 (SELASA)", masa: "14:30", teamA: "IPD Kuala Selangor", teamB: "IPD Sepang", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    13: { hari: "23 JUN 2026 (SELASA)", masa: "15:00", teamA: "IPD Klang Selatan", teamB: "IPD Shah Alam", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    14: { hari: "23 JUN 2026 (SELASA)", masa: "15:30", teamA: "IPD Sabak Bernam", teamB: "IPD Hulu Selangor", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    // 24 Jun
-    15: { hari: "24 JUN 2026 (RABU)", masa: "08:30", teamA: "IPD KLIA", teamB: "IPD Subang Jaya", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    16: { hari: "24 JUN 2026 (RABU)", masa: "09:00", teamA: "IPD Sungai Buloh", teamB: "IPD Gombak", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    17: { hari: "24 JUN 2026 (RABU)", masa: "09:30", teamA: "IPD Sedang", teamB: "IPK Selangor", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    18: { hari: "24 JUN 2026 (RABU)", masa: "10:00", teamA: "IPD Kuala Langat", teamB: "IPD Klang Utara", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    19: { hari: "24 JUN 2026 (RABU)", masa: "10:30", teamA: "IPD Petaling Jaya", teamB: "IPD KLIA", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    20: { hari: "24 JUN 2026 (RABU)", masa: "11:30", teamA: "IPD Subang Jaya", teamB: "IPD Sungai Buloh", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    21: { hari: "24 JUN 2026 (RABU)", masa: "12:00", teamA: "IPD Sedang", teamB: "IPD Kuala Langat", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    22: { hari: "24 JUN 2026 (RABU)", masa: "12:30", teamA: "IPK Selangor", teamB: "IPD Klang Utara", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    23: { hari: "24 JUN 2026 (RABU)", masa: "13:00", teamA: "IPD Gombak", teamB: "IPD Petaling Jaya", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    24: { hari: "24 JUN 2026 (RABU)", masa: "13:30", teamA: "IPD KLIA", teamB: "IPD Sungai Buloh", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    25: { hari: "24 JUN 2026 (RABU)", masa: "14:00", teamA: "IPD Sedang", teamB: "IPD Klang Utara", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    26: { hari: "24 JUN 2026 (RABU)", masa: "14:30", teamA: "IPK Selangor", teamB: "IPD Kuala Langat", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    27: { hari: "24 JUN 2026 (RABU)", masa: "15:00", teamA: "IPD Subang Jaya", teamB: "IPD Gombak", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    28: { hari: "24 JUN 2026 (RABU)", masa: "15:30", teamA: "IPD Petaling Jaya", teamB: "IPD Sungai Buloh", scoreA: 0, scoreB: 0, status: "BELUM MULA" },
-    // Suku Akhir & Seterusnya
-    29: { hari: "25 JUN 2026 (KHAMIS)", masa: "08:30", teamA: "JOHAN A", teamB: "NAIB C", scoreA: 0, scoreB: 0, status: "SUKU AKHIR" },
-    30: { hari: "25 JUN 2026 (KHAMIS)", masa: "09:00", teamA: "JOHAN D", teamB: "NAIB B", scoreA: 0, scoreB: 0, status: "SUKU AKHIR" },
-    31: { hari: "25 JUN 2026 (KHAMIS)", masa: "09:30", teamA: "JOHAN B", teamB: "NAIB D", scoreA: 0, scoreB: 0, status: "SUKU AKHIR" },
-    32: { hari: "25 JUN 2026 (KHAMIS)", masa: "10:00", teamA: "JOHAN C", teamB: "NAIB A", scoreA: 0, scoreB: 0, status: "SUKU AKHIR" },
-    33: { hari: "25 JUN 2026 (KHAMIS)", masa: "12:00", teamA: "MENANG 29", teamB: "MENANG 30", scoreA: 0, scoreB: 0, status: "SEPARUH AKHIR" },
-    34: { hari: "25 JUN 2026 (KHAMIS)", masa: "12:30", teamA: "MENANG 31", teamB: "MENANG 32", scoreA: 0, scoreB: 0, status: "SEPARUH AKHIR" },
-    35: { hari: "25 JUN 2026 (KHAMIS)", masa: "14:00", teamA: "KALAH 33", teamB: "KALAH 34", scoreA: 0, scoreB: 0, status: "TEMPAT ke-3/4" },
-    36: { hari: "26 JUN 2026 (JUMAAT)", masa: "15:00", teamA: "MENANG 33", teamB: "MENANG 34", scoreA: 0, scoreB: 0, status: "AKHIR" }
-};
+    let scoreA = 0;
+    let scoreB = 0;
+    let seconds = 600; // Masa perlawanan laluan (10 Minit)
+    let timerInterval = null;
 
-// Bina drop-down pilihan perlawanan 1-36
-window.onload = function() {
-    const select = document.getElementById("matchSelect");
-    for (let i = 1; i <= 36; i++) {
-        let opt = document.createElement("option");
-        opt.value = i;
-        opt.innerText = "PERLAWANAN " + i;
-        select.appendChild(opt);
-    }
-    
-    document.getElementById("teamA").addEventListener("keyup", saveData);
-    document.getElementById("teamB").addEventListener("keyup", saveData);
-    
-    // Ambil data permulaan perlawanan aktif
-    database.ref('netballLive/currentMatch').once('value', (snap) => {
-        if(snap.val()) {
-            document.getElementById("matchSelect").value = snap.val();
+    // AUTO LOAD NAMA PASUKAN IKUT SELECTION
+    function loadMatchSetup() {
+        let matchId = document.getElementById("matchSelect").value;
+        
+        // Tarik data dari objek matchTeams jika ada, jika tiada kosongkan
+        if(matchTeams[matchId]) {
+            document.getElementById("teamA").value = matchTeams[matchId].a;
+            document.getElementById("teamB").value = matchTeams[matchId].b;
+            document.getElementById("lblTeamA").innerText = matchTeams[matchId].a;
+            document.getElementById("lblTeamB").innerText = matchTeams[matchId].b;
+        } else {
+            document.getElementById("teamA").value = "";
+            document.getElementById("teamB").value = "";
+            document.getElementById("lblTeamA").innerText = "PASUKAN 1 (A)";
+            document.getElementById("lblTeamB").innerText = "PASUKAN 2 (B)";
         }
-        loadSelectedMatch();
-    });
-}
 
-function setupDefaultJadual() {
-    if(confirm("Adakah anda pasti mahu memasukkan/reset jadual asal 36 perlawanan ke database?")) {
-        database.ref('perlawananList').set(jadualAsal);
-        alert("Jadual berjaya dimasukkan!");
-        loadSelectedMatch();
-    }
-}
-
-function loadSelectedMatch() {
-    let matchId = document.getElementById("matchSelect").value;
-    database.ref('perlawananList/' + matchId).once('value', (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            scoreA = data.scoreA || 0;
-            scoreB = data.scoreB || 0;
-            document.getElementById("teamA").value = data.teamA;
-            document.getElementById("teamB").value = data.teamB;
-            document.getElementById("scoreA").innerText = scoreA;
-            document.getElementById("scoreB").innerText = scoreB;
-            
-            // Sync juga data semasa pemasa sekiranya ada
-            database.ref('netballLive').once('value', (liveSnap) => {
-                let liveData = liveSnap.val();
-                if(liveData && liveData.currentMatch == matchId) {
-                    document.getElementById("status").innerText = liveData.status;
-                    document.getElementById("timer").innerText = liveData.timer;
-                    seconds = timeToSeconds(liveData.timer);
-                } else {
-                    document.getElementById("status").innerText = "SEPARUH MASA PERTAMA";
-                    document.getElementById("timer").innerText = "10:00";
-                    seconds = 600;
+        // Semak sekiranya data perlawanan tersebut sudah wujud atau pernah disimpan di Firebase sebelumnya
+        database.ref('perlawananList/' + matchId).once('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                scoreA = data.scoreA || 0;
+                scoreB = data.scoreB || 0;
+                document.getElementById("scoreA").innerText = scoreA;
+                document.getElementById("scoreB").innerText = scoreB;
+                
+                let badge = document.getElementById("status");
+                badge.innerText = data.status || "BELUM MULA";
+                badge.className = "status-badge " + (data.status ? data.status.toLowerCase() : "");
+                
+                document.getElementById("timer").innerText = data.timer || "10:00";
+                seconds = timeToSeconds(data.timer || "10:00");
+                
+                if(data.teamA) {
+                    document.getElementById("teamA").value = data.teamA;
+                    document.getElementById("lblTeamA").innerText = data.teamA;
                 }
-            });
+                if(data.teamB) {
+                    document.getElementById("teamB").value = data.teamB;
+                    document.getElementById("lblTeamB").innerText = data.teamB;
+                }
+            } else {
+                // Sediakan data default jika perlawanan belum dimulakan lagi
+                scoreA = 0; scoreB = 0;
+                document.getElementById("scoreA").innerText = 0;
+                document.getElementById("scoreB").innerText = 0;
+                document.getElementById("status").innerText = "BELUM MULA";
+                document.getElementById("status").className = "status-badge";
+                document.getElementById("timer").innerText = "10:00";
+                seconds = 600;
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        });
+    }
+
+    // Panggil tetapan kali pertama run admin panel
+    window.onload = function() {
+        loadMatchSetup();
+    };
+
+    // FUNGSI SISTEM TIMING & SKORING
+    function changeScore(team, val){
+        if(team === 'A') { scoreA = Math.max(0, scoreA + val); document.getElementById("scoreA").innerText = scoreA; }
+        else { scoreB = Math.max(0, scoreB + val); document.getElementById("scoreB").innerText = scoreB; }
+        saveData();
+    }
+
+    function setManualTime() {
+        let val = document.getElementById("manualTimeInput").value;
+        if(val.includes(":")) {
+            document.getElementById("timer").innerText = val;
+            seconds = timeToSeconds(val);
+            saveData();
         }
-    });
-}
+    }
 
-function changeScore(team, val){
-    if(team === "A") { scoreA += val; if(scoreA < 0) scoreA = 0; document.getElementById("scoreA").innerText = scoreA; }
-    if(team === "B") { scoreB += val; if(scoreB < 0) scoreB = 0; document.getElementById("scoreB").innerText = scoreB; }
-    saveData();
-}
+    function startMatch() {
+        let badge = document.getElementById("status");
+        badge.innerText = "LIVE"; badge.className = "status-badge live";
+        
+        if(!timerInterval) {
+            timerInterval = setInterval(() => {
+                if(seconds > 0) { seconds--; updateTimer(); saveData(); } 
+                else { endMatch(); }
+            }, 1000);
+        }
+        saveData();
+    }
 
-function startTimer(){
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        if(seconds > 0){ seconds--; updateTimer(); saveData(); } else { nextPhase(); }
-    }, 1000);
-}
+    function pauseTimer() {
+        clearInterval(timerInterval); timerInterval = null;
+        let badge = document.getElementById("status");
+        if(badge.innerText === "LIVE") { badge.innerText = "PAUSE"; badge.className = "status-badge"; }
+        saveData();
+    }
 
-function pauseTimer(){ clearInterval(timerInterval); }
-function resetTimer(){ clearInterval(timerInterval); phase = 1; seconds = 600; document.getElementById("status").innerText = "SEPARUH MASA PERTAMA"; updateTimer(); saveData(); }
+    function triggerRest() {
+        clearInterval(timerInterval); timerInterval = null;
+        document.getElementById("status").innerText = "REHAT";
+        document.getElementById("status").className = "status-badge";
+        seconds = 600; // Reset ke 10 minit rehat
+        updateTimer(); saveData();
+    }
 
-function nextPhase(){
-    let statusText = document.getElementById("status").innerText;
-    if(statusText === "SEPARUH MASA PERTAMA"){ seconds = 180; document.getElementById("status").innerText = "REHAT"; }
-    else if(statusText === "REHAT"){ seconds = 600; document.getElementById("status").innerText = "SEPARUH MASA KEDUA"; }
-    else { clearInterval(timerInterval); document.getElementById("status").innerText = "TAMAT"; document.getElementById("timer").innerText = "00:00"; }
-    updateTimer(); saveData();
-}
+    function endMatch() {
+        clearInterval(timerInterval); timerInterval = null;
+        let badge = document.getElementById("status");
+        let statusText = badge.innerText;
+        
+        if(statusText === "REHAT"){
+            seconds = 600;
+            document.getElementById("status").innerText = "SEPARUH MASA KEDUA";
+        } else {
+            document.getElementById("status").innerText = "TAMAT";
+            document.getElementById("status").className = "status-badge tamat";
+            document.getElementById("timer").innerText = "00:00";
+        }
+        updateTimer(); saveData();
+    }
 
-function updateTimer(){
-    let min = Math.floor(seconds / 60); let sec = seconds % 60;
-    document.getElementById("timer").innerText = String(min).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
-}
+    function updateTimer(){
+        let min = Math.floor(seconds / 60); let sec = seconds % 60;
+        document.getElementById("timer").innerText = String(min).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+    }
 
-function timeToSeconds(tStr) { if(!tStr || !tStr.includes(":")) return 600; let p = tStr.split(":"); return (parseInt(p[0])*60) + parseInt(p[1]); }
+    function timeToSeconds(tStr) {
+        if(!tStr || !tStr.includes(":")) return 600;
+        let p = tStr.split(":"); return (parseInt(p[0])*60) + parseInt(p[1]);
+    }
 
-function saveData(){
-    let matchId = document.getElementById("matchSelect").value;
-    let tA = document.getElementById("teamA").value;
-    let tB = document.getElementById("teamB").value;
-    let stat = document.getElementById("status").innerText;
-    let tmr = document.getElementById("timer").innerText;
+    function resetAllFields() {
+        if(confirm("Adakah anda pasti untuk reset masa, skor, dan status perlawanan ini semula?")) {
+            clearInterval(timerInterval); timerInterval = null;
+            scoreA = 0; scoreB = 0; seconds = 600;
+            document.getElementById("scoreA").innerText = 0;
+            document.getElementById("scoreB").innerText = 0;
+            document.getElementById("timer").innerText = "10:00";
+            document.getElementById("status").innerText = "BELUM MULA";
+            document.getElementById("status").className = "status-badge";
+            saveData();
+        }
+    }
 
-    // Simpan ke arkib senarai perlawanan
-    database.ref('perlawananList/' + matchId).update({
-        teamA: tA, teamB: tB, scoreA: scoreA, scoreB: scoreB,
-        status: (stat === "TAMAT") ? "TAMAT" : "LIVE"
-    });
+    function saveData(){
+        let matchId = document.getElementById("matchSelect").value;
+        let tA = document.getElementById("teamA").value;
+        let tB = document.getElementById("teamB").value;
+        let stat = document.getElementById("status").innerText;
+        let tmr = document.getElementById("timer").innerText;
 
-    // Simpan ke paparan skrin utama LIVE
-    database.ref('netballLive').set({
-        currentMatch: matchId,
-        matchNumber: "PERLAWANAN " + matchId,
-        teamA: tA, teamB: tB, scoreA: scoreA, scoreB: scoreB, status: stat, timer: tmr
-    });
-}
+        database.ref('perlawananList/' + matchId).update({
+            teamA: tA, teamB: tB, scoreA: scoreA, scoreB: scoreB,
+            status: (stat === "TAMAT") ? "TAMAT" : ((stat === "LIVE") ? "LIVE" : stat),
+            timer: tmr
+        });
+    }
 </script>
+
 </body>
 </html>
