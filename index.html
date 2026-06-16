@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Score Bola Jaring - Piala KP Selangor 2026</title>
 
-    <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -153,7 +152,7 @@
             font-family: 'Arial Black', sans-serif;
             font-size: 1.1rem;
             font-weight: bold;
-            color: #ef4444; /* Merah menyala untuk status dinamik */
+            color: #ef4444;
             text-transform: uppercase;
             letter-spacing: 1px;
             background: rgba(239, 68, 68, 0.1);
@@ -174,7 +173,7 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 4.5rem;
             font-weight: bold;
-            color: #2ecc71; /* Hijau digital neon */
+            color: #2ecc71;
             background: #090d16;
             padding: 10px 25px;
             border-radius: 15px;
@@ -246,7 +245,6 @@
 </head>
 <body>
 
-<!-- Butang Terapung Navigasi ke Jadual -->
 <div class="nav-floating">
     <a href="jadual.html" class="btn-schedule">
         📅 Lihat Jadual Perlawanan
@@ -256,34 +254,28 @@
 <div class="overlay">
     <div class="scoreboard">
         
-        <!-- Logo PDRM Asal Dikekalkan -->
         <div class="logo-container">
             <img src="logo_pdrm.png" alt="Logo PDRM">
         </div>
         
-        <!-- Tajuk Kejohanan Asal -->
         <div class="tournament-title">
             Perlawanan Bola Jaring<br>Piala KP Selangor 2026
         </div>
 
-        <!-- ID Komponen Dinamik Firebase -->
         <div class="match-number" id="matchNumber">PERLAWANAN --</div>
 
         <div class="teams">
             
-            <!-- Pasukan A -->
             <div class="team-box">
                 <div class="team" id="teamA">PASUKAN A</div>
                 <div class="score" id="scoreA">0</div>
             </div>
 
-            <!-- Pusat Info Dinamik (Status & Timer) -->
             <div class="middle">
                 <div class="status" id="status">MULA PERLAWANAN</div>
                 <div class="timer" id="timer">00:00</div>
             </div>
 
-            <!-- Pasukan B -->
             <div class="team-box">
                 <div class="team" id="teamB">PASUKAN B</div>
                 <div class="score" id="scoreB">0</div>
@@ -294,7 +286,6 @@
 </div>
 
 <script>
-    // Konfigurasi Pangkalan Data Real-time Firebase Asal (100% Dikekalkan)
     const firebaseConfig = {
         apiKey: "AIzaSyA_r3S48RffSWJ5Zfx6DuNbLsQe1NiqxNk",
         authDomain: "kpcupbolajaring2026.firebaseapp.com",
@@ -306,24 +297,44 @@
         databaseURL: "https://kpcupbolajaring2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
     };
 
-    // Mulakan Firebase Sambungan
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Penyambungan Data Sinkronisasi Real-Time LIVE
+    // Fungsi khas untuk membersihkan kod kumpulan (e.g. "IPD KLIA [D1]" atau "IPD KLIA D1" -> "IPD KLIA")
+    function cleanTeamName(name) {
+        if (!name) return "";
+        // Membuang corak [A1], [B2], D1, C3 dsb termasuk pembuka/penutup kurungan
+        return name.replace(/\[[A-Z]\d+\]/gi, '').replace(/\b[A-Z]\d+\b/gi, '').trim();
+    }
+
     database.ref('netballLive').on('value', (snapshot) => {
         const data = snapshot.val();
         if(!data) return;
 
         if(data.matchNumber && document.getElementById("matchNumber")) {
-            document.getElementById("matchNumber").innerText = data.matchNumber;
+            document.getElementById("matchNumber").innerText = "PERLAWANAN " + data.matchNumber;
         }
-        if(document.getElementById("teamA")) document.getElementById("teamA").innerText = data.teamA;
-        if(document.getElementById("teamB")) document.getElementById("teamB").innerText = data.teamB;
-        if(document.getElementById("scoreA")) document.getElementById("scoreA").innerText = data.scoreA;
-        if(document.getElementById("scoreB")) document.getElementById("scoreB").innerText = data.scoreB;
-        if(document.getElementById("status")) document.getElementById("status").innerText = data.status;
-        if(document.getElementById("timer")) document.getElementById("timer").innerText = data.timer;
+        
+        // Memaparkan nama bersih (Tanpa Kod Kumpulan) pada Skrin index.html
+        if(document.getElementById("teamA")) document.getElementById("teamA").innerText = cleanTeamName(data.teamA);
+        if(document.getElementById("teamB")) document.getElementById("teamB").innerText = cleanTeamName(data.teamB);
+        
+        if(document.getElementById("scoreA")) document.getElementById("scoreA").innerText = (data.scoreA !== undefined) ? data.scoreA : 0;
+        if(document.getElementById("scoreB")) document.getElementById("scoreB").innerText = (data.scoreB !== undefined) ? data.scoreB : 0;
+        
+        if(document.getElementById("status")) document.getElementById("status").innerText = data.status || "BELUM MULA";
+        if(document.getElementById("timer")) document.getElementById("timer").innerText = data.timer || "10:00";
+
+        // Logik kelas status hiasan asal
+        let currentStatus = String(data.status).toUpperCase();
+        const elStatus = document.getElementById("status");
+        if(elStatus) {
+            if(currentStatus === "LIVE") elStatus.className = "status-badge live";
+            else if(currentStatus === "PAUSE") elStatus.className = "status-badge pause";
+            else if(currentStatus === "REHAT") elStatus.className = "status-badge rehat";
+            else if(currentStatus === "TAMAT") elStatus.className = "status-badge tamat";
+            else elStatus.className = "status";
+        }
     });
 </script>
 
