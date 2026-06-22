@@ -72,6 +72,7 @@
         <button class="action-btn btn-green" onclick="startTimer(600, 'SEPARUH MASA PERTAMA')">Separuh Masa Pertama (10m)</button>
         <button class="action-btn btn-blue" onclick="startTimer(180, 'REHAT')">REHAT (3m)</button>
         <button class="action-btn btn-green" onclick="startTimer(600, 'SEPARUH MASA KEDUA')">Separuh Masa Kedua (10m)</button>
+        <button class="action-btn btn-green" onclick="resumeTimer()">START</button>
         <button class="action-btn btn-yellow" onclick="pauseTimer()">PAUSE</button>
         <button class="action-btn btn-red" onclick="endMatch()">TAMAT PERLAWANAN</button>
         <button class="action-btn" onclick="resetAllFields()" style="background:#7f8c8d;">RESET SEMUA</button>
@@ -147,6 +148,18 @@
         clearInterval(timerInterval);
         seconds = duration;
         document.getElementById("status").innerText = status;
+        timerInterval = setInterval(() => {
+            if(seconds > 0) {
+                seconds--;
+                let m = Math.floor(seconds/60), s = seconds%60;
+                document.getElementById("timer").innerText = String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+                saveData();
+            } else { clearInterval(timerInterval); }
+        }, 1000);
+    }
+
+    function resumeTimer() {
+        if (timerInterval) return;
         timerInterval = setInterval(() => {
             if(seconds > 0) {
                 seconds--;
